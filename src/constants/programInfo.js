@@ -102,7 +102,7 @@ export const schoolLogo = logo // go to header.js if height needs adjustment
 
 export const schoolName = "Worcester State University"
 
-export const schoolURL = "" // update with url of school's website
+export const schoolURL = "#" // update with url of school's website
 
 export const skfURL = "https://worcesterstate.skills.fund" // update with Skills Fund url
 
