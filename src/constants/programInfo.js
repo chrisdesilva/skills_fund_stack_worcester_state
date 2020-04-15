@@ -25,9 +25,9 @@ export const schoolInfo = {
       financeCharge60: "$4,098.56",
       IOPayment60: "$92.27",
       FullMonthlyPayment60: "$219.00",
-      LoanExampleAmt: "$9,595",
-      LoanExampleOFeeAmt: "$479.75",
-      LoanExampleAmtPlusOFee: "$10,074.75",
+      LoanExampleAmt: "$9,545",
+      LoanExampleOFeeAmt: "$477.25",
+      LoanExampleAmtPlusOFee: "$10,022.25",
       programLength: "4", // program length in months
     },
   ],
@@ -41,9 +41,9 @@ export const schoolInfo = {
       APR60: "13.14%",
       financeCharge60: "$3,692.74",
       FullMonthlyPayment60: "$228.13",
-      LoanExampleAmt: "$9,595",
-      LoanExampleOFeeAmt: "$479.75",
-      LoanExampleAmtPlusOFee: "$10,074.75",
+      LoanExampleAmt: "$9,545",
+      LoanExampleOFeeAmt: "$477.25",
+      LoanExampleAmtPlusOFee: "$10,022.25",
     },
   ],
 }
@@ -63,7 +63,7 @@ export const faq = {
   origFee: 0.05,
 
   // interest payment FAQ info
-  exampleLoanAmount: "$9,595",
+  exampleLoanAmount: "$9,545",
   interestRate36: "8.99%",
   interestRate60: "10.99%",
   APR36: "11.59%",
@@ -75,7 +75,7 @@ export const faq = {
   loanRange: [
     {
       programName: "Web Development",
-      maxAmount: "$9,595",
+      maxAmount: "$9,545",
       col: false,
       colAmount: "$6,000",
     },
@@ -87,7 +87,7 @@ export const faq = {
     // },
     {
       programName: "Clinical Trial Management",
-      maxAmount: "$9,595",
+      maxAmount: "$9,545",
       col: false,
       colAmount: "$6,000",
     },
@@ -102,7 +102,7 @@ export const schoolLogo = logo // go to header.js if height needs adjustment
 
 export const schoolName = "Worcester State University"
 
-export const schoolURL = "https://www.SCHOOLWEBSITE.com/" // update with url of school's website
+export const schoolURL = "#" // update with url of school's website
 
 export const skfURL = "https://worcesterstate.skills.fund" // update with Skills Fund url
 
@@ -137,8 +137,8 @@ export const selectAProgram = "select_a_worcesterstate_program" // update school
 
 // ***** BEGIN LOAN APP AND CALC INFO *****
 
-export const defaultLoanAmount = 9595
-export const placeholder = "$9,595"
+export const defaultLoanAmount = 9545
+export const placeholder = "$9,545"
 export const interestRates = {
   ir36: 8.99,
   ir60: 10.99,
@@ -152,7 +152,7 @@ export const programLoanInfo = [
     url: "https://my.skills.fund/application?lenderCode=SFSEWSUWD20",
     loanInfo: {
       // match loanInfo in first metro below
-      maxLoanAmt: 9595,
+      maxLoanAmt: 9545,
       loanTerm36: true,
       loanTerm60: true,
       "0": {
@@ -176,7 +176,7 @@ export const programLoanInfo = [
         location: "Metro 1",
         loanInfo: {
           // // match loanInfo to Program 1 above
-          maxLoanAmt: 9595,
+          maxLoanAmt: 9545,
           loanTerm36: true,
           loanTerm60: true,
           "0": {
@@ -283,7 +283,7 @@ export const programLoanInfo = [
     url: "https://my.skills.fund/application?lenderCode=SFSEWSUCTM20",
     loanInfo: {
       // match loanInfo in first metro below
-      maxLoanAmt: 9995,
+      maxLoanAmt: 9545,
       loanTerm36: true,
       loanTerm60: true,
       "0": {
@@ -305,7 +305,7 @@ export const programLoanInfo = [
       {
         location: "Metro A",
         loanInfo: {
-          maxLoanAmt: 9995,
+          maxLoanAmt: 9545,
           loanTerm36: true,
           loanTerm60: true,
           "0": {
@@ -360,7 +360,7 @@ export const programLoanInfo = [
 
 // ***** BEGIN LOAN CALC TEXT INFO *****
 export const programMaxText =
-  "Choose the loan amount that works best for you. Borrow up to $9,995 in tuition for each of Framingham State University's programs."
+  "Choose the loan amount that works best for you. Borrow up to $9,545 in tuition for each of Worcester State University's programs."
 
 export const paymentTable = {
   headers: ["Program", "Tuition", "Cost of Living", "Max Total"],
