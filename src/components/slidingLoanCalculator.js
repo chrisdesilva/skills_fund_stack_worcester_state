@@ -1,12 +1,10 @@
-import React, { useEffect, useState } from "react"
+import React, { Fragment, useEffect, useState } from "react"
 import LoanCalcPaymentTable from "./loancalcpaymenttable"
-import { UnmountClosed as Collapse } from "react-collapse"
 import Image from "../components/image"
 import {
   defaultLoanAmount,
   faq,
   interestRates,
-  paymentTable,
   programLoanInfo,
   schoolName,
 } from "../constants/programInfo"
@@ -14,7 +12,9 @@ import {
 const SlidingLoanCalculator = props => {
   const [metroIndex, setMetroIndex] = useState(0)
   const [programIndex, setProgramIndex] = useState(0)
-  const [loanValue, setLoanValue] = useState(defaultLoanAmount)
+  const [loanValue, setLoanValue] = useState(
+    programLoanInfo[programIndex]["loanInfo"]["maxLoanAmt"]
+  )
   const [programMax, setProgramMax] = useState(
     programLoanInfo[0]["loanInfo"]["maxLoanAmt"]
   )
@@ -31,21 +31,19 @@ const SlidingLoanCalculator = props => {
     payment60: null,
   })
   const [nonPaymentPeriod, setNonPaymentPeriod] = useState(
-    programLoanInfo[0]["loanInfo"]["0"]["k"]
+    programLoanInfo[0]["loanInfo"]["Interest Only"]["k"]
   )
-  const [loanType, setLoanType] = useState(
-    programLoanInfo[0]["defaultLoanType"]
-  )
+  const [loanType, setLoanType] = useState(programLoanInfo[0]["loanTypes"][0])
   const [showLoanTypes, setShowLoanTypes] = useState(
     programLoanInfo[0]["showLoanTypes"]
   )
-  const [locations, setLocations] = useState(programLoanInfo[0]["locations"])
+  const queryParams = programLoanInfo.map(program => program.queryParams)
   const [metros, setMetros] = useState(programLoanInfo[0]["metros"])
   const [multiMetros, hasMultiMetros] = useState(
     programLoanInfo[0]["showMetros"]
   )
   const [loanInformation, setLoanInformation] = useState(
-    programLoanInfo[0].loanInfo
+    programLoanInfo[0]["loanInfo"]
   )
 
   const formatter = new Intl.NumberFormat("en-US", {
@@ -99,7 +97,7 @@ const SlidingLoanCalculator = props => {
     let months = [36, 60]
     let interestPeriod = nonPaymentPeriod
     let payments = []
-    if (loanType === "0") {
+    if (loanType === "Interest Only") {
       payments[0] =
         interestPayment.payment36 * interestPeriod +
         monthlyPayment.payment36 * months[0]
@@ -115,7 +113,7 @@ const SlidingLoanCalculator = props => {
 
   const handleProgramName = e => {
     setProgramIndex(Number(e.target.value))
-    // setLoanType(programLoanInfo[programIndex]['defaultLoanType'])
+    setLoanType(programLoanInfo[programIndex]["defaultLoanType"])
   }
 
   const handleLoanType = e => {
@@ -127,8 +125,18 @@ const SlidingLoanCalculator = props => {
   }
 
   useEffect(() => {
+    if (queryParams.indexOf(props.location) !== -1) {
+      setProgramIndex(queryParams.indexOf(props.location)) // read query params in url, set default value of select based on index of program
+    }
+  }, [])
+
+  useEffect(() => {
+    setLoanType(programLoanInfo[programIndex]["loanTypes"][0])
+  }, [programIndex])
+
+  useEffect(() => {
     calculateMonthlyPayment() // run calculator when page loads to show initial amounts
-    setLoanType(programLoanInfo[programIndex]["defaultLoanType"])
+    // setLoanType(programLoanInfo[programIndex][loanTypes]);
     hasMultiMetros(programLoanInfo[programIndex]["showMetros"])
     setShowLoanTypes(programLoanInfo[programIndex]["showLoanTypes"])
     setLoanInformation(programLoanInfo[programIndex]["loanInfo"])
@@ -144,38 +152,28 @@ const SlidingLoanCalculator = props => {
       setProgramMax(programLoanInfo[programIndex]["loanInfo"]["maxLoanAmt"])
     }
 
-    // if the program selected has a maximum loan amount smaller than the default loan amount, set the initial value of the slider to the program's max
-    if (
-      defaultLoanAmount >
-      programLoanInfo[programIndex]["loanInfo"]["maxLoanAmt"]
-    ) {
-      setLoanValue(programLoanInfo[programIndex]["loanInfo"]["maxLoanAmt"])
-    } else {
-      setLoanValue(defaultLoanAmount)
-    }
-    // hook is triggered when the values in the array below are updated
-  }, [metroIndex, programIndex, programMax])
+    setLoanValue(programLoanInfo[programIndex]["loanInfo"]["maxLoanAmt"])
+  }, [metroIndex, programIndex, programMax, loanType])
 
   useEffect(() => {
     calculateTotalPayment()
-  }, [monthlyPayment, loanType])
+  }, [monthlyPayment])
 
   useEffect(() => {
-    if (loanType === "0") {
-      setNonPaymentPeriod(programLoanInfo[programIndex]["loanInfo"]["0"]["k"])
-    }
+    calculateTotalPayment()
   }, [loanType])
 
   useEffect(() => {
-    // watches for changes to metroIndex, updates dropdown/loan info accordingly
-    setLoanInformation(
-      programLoanInfo[programIndex]["metros"][metroIndex]["loanInfo"]
-    )
-  }, [metroIndex])
+    if (loanType === "Interest Only") {
+      setNonPaymentPeriod(
+        programLoanInfo[programIndex]["loanInfo"]["Interest Only"]["k"]
+      )
+    }
+  }, [loanType, programIndex])
 
   return (
     <div className={props.modal ? "loanCalculator opacity" : "loanCalculator"}>
-      <div className="loanCalculator__content pt-8 bg-gray-100">
+      <div className="loanCalculator__content pt-8 bg-white">
         <div className="loanCalculator__select flex flex-col items-center px-4">
           <div className="flex flex-col md:flex-row md:justify-between mb-8">
             <div className="flex flex-col md:w-1/2 justify-center px-4">
@@ -187,10 +185,6 @@ const SlidingLoanCalculator = props => {
                 math degree. Find out exactly what you'll pay at {schoolName}{" "}
                 with a Skills Fund loan.
               </p>
-              <p>
-                <strong>Please note:</strong> you may not finance your deposit
-                for {schoolName}'s program.
-              </p>
             </div>
             <div className="w-full md:w-1/2 lg:w-1/3">
               <Image />
@@ -199,17 +193,16 @@ const SlidingLoanCalculator = props => {
 
           <div>
             {faq.multiPrograms ? (
-              <>
-                <label className="text-xs" htmlFor="program">
+              <Fragment>
+                <label className="text-sm" htmlFor="program">
                   Select your program
                 </label>
                 <div className="loanCalculator__selectInput">
                   <select
                     id="program"
-                    defaultValue={"default"}
+                    value={programIndex}
                     onChange={handleProgramName}
                   >
-                    {/* <option>Select a program</option> */}
                     {programLoanInfo.map((program, i) => (
                       <option label={program.name} value={i} key={program.name}>
                         {program.name}
@@ -217,60 +210,50 @@ const SlidingLoanCalculator = props => {
                     ))}
                   </select>
                 </div>
-              </>
+              </Fragment>
             ) : null}
 
             <p>{` `}</p>
 
-            <Collapse
-              isOpened={showLoanTypes}
-              springConfig={{ stiffness: 150, damping: 30 }}
+            <label
+              className={showLoanTypes ? "text-sm" : "hide"}
+              htmlFor="program"
             >
-              <label htmlFor="loanType" className="text-xs text-center">
-                Select a Loan Type:
-              </label>
-              <div className="flex flex-col loanCalculator__selectInput">
-                <select id="loanType" onChange={handleLoanType}>
-                  <option value="0">Interest-Only</option>
-                  <option value="1">Immediate Repayment</option>
-                </select>
-              </div>
-            </Collapse>
-
-            {/* <label className={showLoanTypes ? "text-sm" : "hide"} htmlFor="program">Select your loan type</label>
-                        <div className={showLoanTypes ? "loanCalculator__selectInput" : "hide"}>
-                            <select defaultValue={'default'} onChange={handleLoanType}>
-                                <option value="0">Interest-Only</option>
-                                <option value="1">Immediate Repayment</option>
-                            </select>
-                        </div> */}
+              Select your loan type
+            </label>
+            <div
+              className={showLoanTypes ? "loanCalculator__selectInput" : "hide"}
+            >
+              <select value={loanType} onChange={handleLoanType}>
+                {programLoanInfo[programIndex]["loanTypes"].map(
+                  (loanType, i) => (
+                    <option label={loanType} value={loanType} key={loanType}>
+                      {loanType}
+                    </option>
+                  )
+                )}
+              </select>
+            </div>
 
             <p>{` `}</p>
 
-            <Collapse
-              isOpened={multiMetros}
-              springConfig={{ stiffness: 150, damping: 30 }}
+            <label
+              className={multiMetros ? "text-sm" : "hide"}
+              htmlFor="program"
             >
-              <label htmlFor="metro" className="text-xs text-center">
-                Select a Metro:
-              </label>
-              <div className="flex flex-col loanCalculator__selectInput">
-                <select id="metro" onChange={handleMetro}>
-                  {metros.map((city, i) => (
-                    <option label={city.location} key={city.location} value={i}>
-                      {city.location}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </Collapse>
-
-            {/* <label className={multiMetros ? "text-sm" : "hide"} htmlFor="program">Select your location</label>
-                        <div className={multiMetros ? "loanCalculator__selectInput" : "hide"}>
-                            <select defaultValue={'default'} onChange={handleMetro}>
-                                {metros.map((city, i) => <option label={city.location} key={city.location} value={i}>{city.location}</option>)}
-                            </select>
-                        </div> */}
+              Select your location
+            </label>
+            <div
+              className={multiMetros ? "loanCalculator__selectInput" : "hide"}
+            >
+              <select defaultValue={"default"} onChange={handleMetro}>
+                {metros.map((city, i) => (
+                  <option label={city.location} key={city.location} value={i}>
+                    {city.location}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
         </div>
 
@@ -281,6 +264,7 @@ const SlidingLoanCalculator = props => {
             onChange={handleSliderAmt}
             onTouchEnd={calculateMonthlyPayment}
             onMouseUp={calculateMonthlyPayment}
+            onKeyUp={calculateMonthlyPayment}
             type="range"
             min="2000"
             step="5"
@@ -293,10 +277,10 @@ const SlidingLoanCalculator = props => {
               <br />
               $2,000
             </p>
-            <p className="text-center">
+            <p className="text-center mb-4">
               Loan Amount
               <br />
-              <span className="loanCalculator__amount">
+              <span className="loanCalculator__amount text-2xl font-bold">
                 {formatter.format(loanValue)}
               </span>
             </p>
@@ -321,28 +305,31 @@ const SlidingLoanCalculator = props => {
             <h4 className="text-center">
               {loanInformation[loanType]["apr36"]}% APR*
             </h4>
-            <span className={loanType === "0" ? "show" : "hide"}>
-              <>
+            <span className={loanType === "Interest Only" ? "show" : "hide"}>
+              <Fragment>
                 <p className="loanCalculator__paymentAmounts text-3xl text-primary font-bold mb-1 text-center">
                   ${interestPayment.payment36}
                 </p>
                 <p className="loanCalculator__paymentLabel text-center text-xs">
                   Monthly Payments in School
                 </p>
-              </>
+              </Fragment>
             </span>
-            <div className={loanType === "0" ? "show" : "show move"}>
+            <div
+              className={loanType === "Interest Only" ? "show" : "show move"}
+            >
               <p className="loanCalculator__paymentAmounts text-3xl text-primary font-bold mb-1 text-center">
                 ${monthlyPayment.payment36}
               </p>
               <p className="loanCalculator__paymentLabel text-center text-xs">
-                Monthly Payments{loanType === "0" ? " After Graduation" : null}
+                Monthly Payments
+                {loanType === "Interest Only" ? " After Graduation" : null}
               </p>
               <p className="loanCalculator__paymentAmounts text-3xl text-primary font-bold mb-1 text-center">
                 {formatterWithCents.format(totalPayment.payment36)}
               </p>
               <p className="loanCalculator__paymentLabel text-center text-xs">
-                Total Cost
+                Total Cost of Loan
               </p>
             </div>
           </div>
@@ -354,46 +341,39 @@ const SlidingLoanCalculator = props => {
               <h4 className="text-center">
                 {loanInformation[loanType]["apr60"]}% APR*
               </h4>
-              <span className={loanType === "0" ? "show" : "hide"}>
-                <>
+              <span className={loanType === "Interest Only" ? "show" : "hide"}>
+                <Fragment>
                   <p className="loanCalculator__paymentAmounts text-3xl text-primary font-bold mb-1 text-center">
                     ${interestPayment.payment60}
                   </p>
                   <p className="loanCalculator__paymentLabel text-center text-xs">
                     Monthly Payments in School
                   </p>
-                </>
+                </Fragment>
               </span>
-              <div className={loanType === "0" ? "show" : "show move"}>
+              <div
+                className={loanType === "Interest Only" ? "show" : "show move"}
+              >
                 <p className="loanCalculator__paymentAmounts text-3xl text-primary font-bold mb-1 text-center">
                   ${monthlyPayment.payment60}
                 </p>
                 <p className="loanCalculator__paymentLabel text-center text-xs">
                   Monthly Payments
-                  {loanType === "0" ? " After Graduation" : null}
+                  {loanType === "Interest Only" ? " After Graduation" : null}
                 </p>
                 <p className="loanCalculator__paymentAmounts text-3xl text-primary font-bold mb-1 text-center">
                   {formatterWithCents.format(totalPayment.payment60)}
                 </p>
                 <p className="loanCalculator__paymentLabel text-center text-xs">
-                  Total Cost
+                  Total Cost of Loan
                 </p>
               </div>
             </div>
           ) : null}
-          {/* <div className="loanCalculator__isa w-1/3">
-                    <h3 className="text-md text-center mb-1"></h3>
-                    <h3 className="text-center">Income Share Agreement</h3>
-                    <span className="show"><><p className="loanCalculator__paymentAmounts text-3xl text-primary font-bold mb-1 text-center">$60,000</p><p className="loanCalculator__paymentLabel text-center text-xs">Annual Salary</p></></span>
-                    <div>
-                        <p className="loanCalculator__paymentAmounts text-3xl text-primary font-bold mb-1 text-center">$750</p><p className="loanCalculator__paymentLabel text-center text-xs">Monthly Payment</p>
-                        <p className="loanCalculator__paymentAmounts text-3xl text-primary font-bold mb-1 text-center">{formatterWithCents.format(programMax * 1.5)}</p><p className="loanCalculator__paymentLabel text-center text-xs">Total Cost</p>
-                    </div>
-                </div> */}
         </div>
         <p className="show text-center text-sm mb-4 pb-4">
-          {loanType === "0"
-            ? "Make interest-only payments while in the program. Two months after completion, begin full payments."
+          {loanType === "Interest Only"
+            ? "Make interest-only payments while in the program. Three months after completion, begin full payments."
             : "Start making full payments (interest + principal) about one month after disbursement."}
         </p>
         <p className="text-center text-xs italic mb-0 pb-4 px-8">
