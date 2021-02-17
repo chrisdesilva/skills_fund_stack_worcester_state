@@ -135,7 +135,7 @@ export const faq = {
   loanRange: [
     {
       programName: "Web Development",
-      maxAmount: "$9,545",
+      maxAmount: "$11,995",
       col: false,
       colAmount: "$6,000",
     },
@@ -147,7 +147,7 @@ export const faq = {
     // },
     {
       programName: "Clinical Trial Management",
-      maxAmount: "$9,545",
+      maxAmount: "$11,995",
       col: false,
       colAmount: "$6,000",
     },
