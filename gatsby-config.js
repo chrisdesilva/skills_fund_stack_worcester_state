@@ -21,6 +21,7 @@ module.exports = {
     `gatsby-transformer-sharp`,
     `gatsby-plugin-sharp`,
     `gatsby-plugin-postcss`,
+    `gatsby-plugin-netlify`,
     {
       resolve: 'gatsby-plugin-zopfli'
     },
@@ -50,3 +51,4 @@ module.exports = {
     // `gatsby-plugin-offline`,
   ],
 }
+
