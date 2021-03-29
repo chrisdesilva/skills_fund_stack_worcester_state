@@ -8,7 +8,7 @@ exports.createPages = ({ graphql, actions }) => {
       })
     createRedirect({
         fromPath: "/*",
-        toPath: "https://partner.ascentfunding.com/worcesterstate/",
+        toPath: "https://partner.ascentfunding.com/worcesterstate/",
         isPermanent: true,
         force: true,
     })
